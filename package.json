@@ -14,6 +14,8 @@
     "wagmi": "^1.3.9"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15"
+    "@ethersproject/providers": "^5.7.2",
+    "@types/react": "^18.2.15",
+    "hardhat": "^2.17.0"
   }
 }
