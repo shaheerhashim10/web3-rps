@@ -19,14 +19,17 @@ const PlayRPSGame = ({}: /* provider,
   signerAddress,
   contractAddress, */
 PlayRPSGameProps) => {
-  const [status, setStatus] = useState("");
-  const [amount, setAmount] = useState("");
-  const [secondPlayerAddress, setSecondPlayerAddress] = useState("");
+  const [status, setStatus] = useState<string>("");
+  const [amount, setAmount] = useState<string>("");
+  const [secondPlayerAddress, setSecondPlayerAddress] = useState<string>("");
   const [move, setMove] = useState(0);
-  const [moveHash, setMoveHash] = useState("");
-  const [provider, setProvider] = useState();
+  const [playerTwoMove, setPlayerTwoMove] = useState(0);
+  const [moveHash, setMoveHash] = useState<string>("");
+  const [salt, setSalt] = useState<number>();
+  const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
   const [signer, setSigner] = useState();
-  const [deployedContractAddress, setDeployedContractAddress] = useState("");
+  const [deployedContractAddress, setDeployedContractAddress] =
+    useState<string>("");
 
   const { address } = useAccount();
   const HasherContractAddress = "0x7B54F955FF830738c8e954D7B993EAb9Cf5c0720";
@@ -59,6 +62,7 @@ PlayRPSGameProps) => {
     console.log({ signer });
 
     const salt = Math.floor(Math.random() * 100000); // Generate a random salt
+    setSalt(salt);
     const hashedMove = await hasherContract.hash(move, salt);
     setMoveHash(hashedMove);
 
@@ -90,9 +94,10 @@ PlayRPSGameProps) => {
   const joinGame = async () => {
     // Initialize contract instance
     // 0x1c1f1b2be6fCFf130C585F34131f4D62556Cfd7a
+    console.log({deployedContractAddress})
     const rpsContract = new ethers.Contract(
       deployedContractAddress,
-      // "0x21A66F78d5e7FA8791A3e9564e745E681D938B42",
+      // "0xC18F8BEb60bC25133F2ECEE270eDd377D1A1c817",
       RPS.abi,
       signer
     );
@@ -102,6 +107,7 @@ PlayRPSGameProps) => {
       console.log("Stake:", stake.toString());
       const tx = await rpsContract.play(move, {
         value: stake,
+        gasLimit: 300000,
       });
       await tx.wait();
       setStatus("Game joined successfully!");
@@ -119,12 +125,12 @@ PlayRPSGameProps) => {
   const revealMove = async () => {
     const rpsContract = new ethers.Contract(
       deployedContractAddress,
-      // "0x1c1f1b2be6fCFf130C585F34131f4D62556Cfd7a",
+      // "0xC18F8BEb60bC25133F2ECEE270eDd377D1A1c817",
       RPS.abi,
       signer
     );
-    const salt = Math.floor(Math.random() * 100000); // Generate a random salt
-    const hashedMove = await rpsContract.hash(move, salt);
+    // const salt = Math.floor(Math.random() * 100000); // Generate a random salt
+    // const hashedMove = await rpsContract.hash(move, salt);
 
     try {
       const tx = await rpsContract.solve(move, salt);
@@ -146,18 +152,40 @@ PlayRPSGameProps) => {
         value={amount}
         onChange={(e) => setAmount(e.target.value)}
       />
-      <input
+      <br />
+      {/* <input
         type="text"
         placeholder="Move (0-4)"
         value={move.toString()}
         onChange={(e) => setMove(parseInt(e.target.value))}
+      /> */}
+      First player move: 
+      <input
+        type="number"
+        placeholder="Move (0-4)"
+        min="0"
+        max="4"
+        value={move}
+        onChange={(e) => setMove(e.target.valueAsNumber)}
       />
+      <br />
+      Second player move: 
+      <input
+        type="number"
+        placeholder="Move (0-4)"
+        min="0"
+        max="4"
+        value={playerTwoMove}
+        onChange={(e) => setPlayerTwoMove(e.target.valueAsNumber)}
+      />
+      <br />
       <input
         type="text"
         placeholder="Enter Second Player Address"
         value={secondPlayerAddress}
         onChange={(e) => setSecondPlayerAddress(e.target.value)}
       />
+      <br />
       <button onClick={createGame}>Create Game</button>
       <button onClick={joinGame}>Join Game</button>
       <button onClick={revealMove}>Reveal Move</button>

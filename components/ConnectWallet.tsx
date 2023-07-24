@@ -1,5 +1,4 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
+"use client";
 import {
   useAccount,
   useConnect,
@@ -19,32 +18,29 @@ export default function ConnectWallet() {
   const disconnectWallet = () => {
     disconnect();
   };
-  if (isConnected) {
-    return (
-      <div>
-        <div>{ensName ? `${ensName} (${address})` : address}</div>
-        {/* <div>Connected to {connector.name}</div> */}
-        <button onClick={disconnectWallet}>Disconnect</button>
-      </div>
-    );
-  }
-
   return (
     <div>
-      {connectors.map((connector) => (
-        <button
-          disabled={!connector.ready}
-          key={connector.id}
-          onClick={() => connect({ connector })}
-        >
-          {connector.name}
-          {!connector.ready && " (unsupported)"}
-          {isLoading &&
-            connector.id === pendingConnector?.id &&
-            " (connecting)"}
-        </button>
-      ))}
-
+      {isConnected ? (
+        <div>
+          <span>{ensName ? `${ensName} (${address})` : address}</span>
+          {/* <div>Connected to {connector.name}</div> */}
+          <button onClick={disconnectWallet}>Disconnect</button>
+        </div>
+      ) : (
+        connectors.map((connector) => (
+          <button
+            disabled={!connector.ready}
+            key={connector.id}
+            onClick={() => connect({ connector })}
+          >
+            {connector.name}
+            {!connector.ready && " (unsupported)"}
+            {isLoading &&
+              connector.id === pendingConnector?.id &&
+              " (connecting)"}
+          </button>
+        ))
+      )}
       {error && <div>{error.message}</div>}
     </div>
   );

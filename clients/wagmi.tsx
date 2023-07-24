@@ -1,3 +1,4 @@
+"use client";
 import { WagmiConfig, createConfig, configureChains } from "wagmi";
 import { goerli } from "wagmi/chains";
 
