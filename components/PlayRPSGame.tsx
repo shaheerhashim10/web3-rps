@@ -62,6 +62,9 @@ PlayRPSGameProps) => {
     console.log({ signer });
 
     const salt = Math.floor(Math.random() * 100000); // Generate a random salt
+    console.log("%ccreateGame", "background: pink");
+    console.log({ move });
+    console.log({ salt });
     setSalt(salt);
     const hashedMove = await hasherContract.hash(move, salt);
     setMoveHash(hashedMove);
@@ -73,7 +76,11 @@ PlayRPSGameProps) => {
         RPS.data.bytecode,
         signer
       );
+
+      console.log("%cLOGS", "background: red");
+      console.log({ hashedMove });
       console.log({ secondPlayerAddress });
+      console.log({ amount });
       const deployedRPSContract = await factory.deploy(
         hashedMove,
         secondPlayerAddress,
@@ -94,7 +101,7 @@ PlayRPSGameProps) => {
   const joinGame = async () => {
     // Initialize contract instance
     // 0x1c1f1b2be6fCFf130C585F34131f4D62556Cfd7a
-    console.log({deployedContractAddress})
+    console.log({ deployedContractAddress });
     const rpsContract = new ethers.Contract(
       deployedContractAddress,
       // "0xC18F8BEb60bC25133F2ECEE270eDd377D1A1c817",
@@ -105,7 +112,11 @@ PlayRPSGameProps) => {
       console.log({ rpsContract });
       const stake = await rpsContract.stake();
       console.log("Stake:", stake.toString());
-      const tx = await rpsContract.play(move, {
+
+      console.log("%cJOINGAME", "background: blue");
+      console.log({ playerTwoMove });
+      console.log({ stake });
+      const tx = await rpsContract.play(playerTwoMove, {
         value: stake,
         gasLimit: 300000,
       });
@@ -133,7 +144,10 @@ PlayRPSGameProps) => {
     // const hashedMove = await rpsContract.hash(move, salt);
 
     try {
-      const tx = await rpsContract.solve(move, salt);
+      console.log("%cReveal_GAME", "background: green");
+      console.log({ move });
+      console.log({ salt });
+      const tx = await rpsContract.solve(move, salt, { gasLimit: 300000 });
       await tx.wait();
       setStatus("Game resolved!");
     } catch (error) {
@@ -159,7 +173,7 @@ PlayRPSGameProps) => {
         value={move.toString()}
         onChange={(e) => setMove(parseInt(e.target.value))}
       /> */}
-      First player move: 
+      First player move:
       <input
         type="number"
         placeholder="Move (0-4)"
@@ -169,7 +183,7 @@ PlayRPSGameProps) => {
         onChange={(e) => setMove(e.target.valueAsNumber)}
       />
       <br />
-      Second player move: 
+      Second player move:
       <input
         type="number"
         placeholder="Move (0-4)"
