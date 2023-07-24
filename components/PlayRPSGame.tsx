@@ -5,6 +5,7 @@ import RPS from "../contracts/abis/RPS.json";
 import Hasher from "../contracts/abis/Hasher.json";
 import React from "react";
 import { useAccount } from "wagmi";
+declare var window: any;
 
 // 0x13D128C6c6d44D10d945abaDFcA0D71629A1f6a2
 // 0xD7F335198Bb8cC3C4a53b817480F59eaf0670821
@@ -27,13 +28,12 @@ PlayRPSGameProps) => {
   const [moveHash, setMoveHash] = useState<string>("");
   const [salt, setSalt] = useState<number>();
   const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
-  const [signer, setSigner] = useState();
+  const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
   const [deployedContractAddress, setDeployedContractAddress] =
     useState<string>("");
 
   const { address } = useAccount();
   const HasherContractAddress = "0x7B54F955FF830738c8e954D7B993EAb9Cf5c0720";
-
   useEffect(() => {
     if (
       typeof window?.ethereum !== "undefined" ||
