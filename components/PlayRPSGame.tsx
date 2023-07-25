@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
+import { useRouter } from "next/router";
 import RPS from "../contracts/abis/RPS.json";
 import Hasher from "../contracts/abis/Hasher.json";
 import React from "react";
@@ -9,17 +10,16 @@ declare var window: any;
 
 // 0x13D128C6c6d44D10d945abaDFcA0D71629A1f6a2
 // 0xD7F335198Bb8cC3C4a53b817480F59eaf0670821
+// http://localhost:3000/?ca=%220x7113D6E63aCaDe02E99BD0074512f1531dc07306%22&address=%220xD7F335198Bb8cC3C4a53b817480F59eaf0670821%22
 interface PlayRPSGameProps {
-  /*   provider: ethers.providers.Provider;
-  // signerAddress: ethers.providers.JsonRpcSigner;
-  signerAddress: string;
-  contractAddress: string; */
+  secondPlayerWalletAddress: string;
+  contractAddress: string;
 }
 
-const PlayRPSGame = ({}: /* provider,
-  signerAddress,
-  contractAddress, */
-PlayRPSGameProps) => {
+const PlayRPSGame = ({
+  secondPlayerWalletAddress,
+  contractAddress,
+}: PlayRPSGameProps) => {
   const [status, setStatus] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [secondPlayerAddress, setSecondPlayerAddress] = useState<string>("");
@@ -31,6 +31,18 @@ PlayRPSGameProps) => {
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner>();
   const [deployedContractAddress, setDeployedContractAddress] =
     useState<string>("");
+
+  const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+  const [gameURL, setGameURL] = useState<string | null>(null);
+  const { pathname } = useRouter();
+
+  console.log("%cPROPS", "background: pink");
+  console.log({ secondPlayerWalletAddress });
+  console.log({ contractAddress });
+
+  useEffect(() => {
+    setCurrentUrl(window.location.href);
+  }, []);
 
   const { address } = useAccount();
   const HasherContractAddress = "0x7B54F955FF830738c8e954D7B993EAb9Cf5c0720";
@@ -89,7 +101,10 @@ PlayRPSGameProps) => {
         }
       );
       console.log({ deployedRPSContract });
+      // const urlOfGame = `${currentUrl}?ca="${deployedRPSContract.address}"&address="${secondPlayerAddress}"`;
+      const urlOfGame = `${currentUrl}?ca="${deployedRPSContract.address}"&address="${secondPlayerAddress}"`;
       setDeployedContractAddress(deployedRPSContract.address);
+      setGameURL(urlOfGame);
       setStatus("Game created successfully!");
     } catch (error) {
       setStatus("Error creating the game.");
@@ -160,6 +175,7 @@ PlayRPSGameProps) => {
     <div>
       <h2>Contract Interaction</h2>
       <div>Status: {status}</div>
+      <span>Enter Amount to stake: </span>
       <input
         type="text"
         placeholder="Amount (ETH)"
@@ -183,7 +199,17 @@ PlayRPSGameProps) => {
         onChange={(e) => setMove(e.target.valueAsNumber)}
       />
       <br />
-      Second player move:
+      <input
+        type="text"
+        placeholder="Enter Second Player Address"
+        value={secondPlayerAddress}
+        onChange={(e) => setSecondPlayerAddress(e.target.value)}
+      />
+      <br />
+      <button onClick={createGame}>Create Game</button>
+      <button onClick={revealMove}>Reveal Move</button>
+      <br />
+      <span>Second player move: </span>
       <input
         type="number"
         placeholder="Move (0-4)"
@@ -193,19 +219,12 @@ PlayRPSGameProps) => {
         onChange={(e) => setPlayerTwoMove(e.target.valueAsNumber)}
       />
       <br />
-      <input
-        type="text"
-        placeholder="Enter Second Player Address"
-        value={secondPlayerAddress}
-        onChange={(e) => setSecondPlayerAddress(e.target.value)}
-      />
-      <br />
-      <button onClick={createGame}>Create Game</button>
       <button onClick={joinGame}>Join Game</button>
-      <button onClick={revealMove}>Reveal Move</button>
+      
       <div>Move Hash: {moveHash}</div>
       <div>Game Smart Contract Address: {deployedContractAddress}</div>
       <div>Status: {status}</div>
+      <div>Game URL: {gameURL}</div>
     </div>
   );
 };

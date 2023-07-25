@@ -1,15 +1,17 @@
 "use client";
 import Head from "next/head";
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams } from "next/navigation";
 import styles from "../styles/Home.module.css";
 import PlayRPSGame from "../components/PlayRPSGame";
 import { WagmiSetup } from "../clients/wagmi";
 import ConnectWallet from "../components/ConnectWallet";
 
 export default function Home() {
-  /* const searchParams = useSearchParams()
-  const search = searchParams.get('ca')
-  console.log(search) */
+  const searchParams = useSearchParams();
+  const contractAddress = searchParams.get("ca");
+  const secondPlayerAddress = searchParams.get("address");
+  console.log({ contractAddress });
+  console.log({ secondPlayerAddress });
   return (
     <div className={styles.container}>
       <Head>
@@ -20,7 +22,10 @@ export default function Home() {
         <h1>Rock Paper Scissors Lizard Spock DApp</h1>
         <WagmiSetup>
           <ConnectWallet />
-          <PlayRPSGame />
+          <PlayRPSGame
+            secondPlayerWalletAddress={secondPlayerAddress}
+            contractAddress={contractAddress}
+          />
         </WagmiSetup>
       </div>
     </div>
