@@ -10,8 +10,6 @@ export default function Home() {
   const searchParams = useSearchParams();
   const contractAddress = searchParams.get("ca");
   const secondPlayerAddress = searchParams.get("address");
-  console.log({ contractAddress });
-  console.log({ secondPlayerAddress });
   return (
     <div className={styles.container}>
       <Head>

@@ -41,18 +41,10 @@ const PlayRPSGame = ({
     provider
   );
 
-  console.log("%cPROPS", "background: pink");
-  console.log({ secondPlayerWalletAddress });
-  console.log({ contractAddress });
-
   useEffect(() => {
     setCurrentUrl(window.location.href);
-  }, []);
-
-  useEffect(() => {
     if (typeof window?.ethereum !== "undefined") {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
-      console.log("%cADDRESS_CHANGED", "background: pink");
       setSigner(provider.getSigner(address));
       setProvider(provider);
     }
@@ -60,14 +52,10 @@ const PlayRPSGame = ({
 
   // Function to create a new RPS game
   const createGame = async () => {
-    console.log({ provider });
-    console.log({ signer });
-
     const salt = Math.floor(Math.random() * 100000); // Generate a random salt
     setSalt(salt);
     const hashedMove = await hasherContract.hash(move, salt);
     setMoveHash(hashedMove);
-
     try {
       // Deploy the contract
       const factory = new ethers.ContractFactory(
@@ -83,8 +71,6 @@ const PlayRPSGame = ({
         }
       );
       await deployedRPSContract.deployed();
-      console.log({ deployedRPSContract });
-      // const urlOfGame = `${currentUrl}?ca="${deployedRPSContract.address}"&address="${secondPlayerAddress}"`;
       const urlOfGame = `${currentUrl}?ca=${deployedRPSContract.address}&address=${secondPlayerAddress}`;
       setDeployedContractAddress(deployedRPSContract.address);
       setGameURL(urlOfGame);
@@ -104,14 +90,7 @@ const PlayRPSGame = ({
     } else {
       contract = deployedContractAddress;
     }
-    console.log({ deployedContractAddress });
-    const rpsContract = new ethers.Contract(
-      // deployedContractAddress,
-      // "0xC18F8BEb60bC25133F2ECEE270eDd377D1A1c817",
-      contract,
-      RPS.abi,
-      signer
-    );
+    const rpsContract = new ethers.Contract(contract, RPS.abi, signer);
     try {
       const stake = await rpsContract.stake();
       const tx = await rpsContract.play(playerTwoMove, {
