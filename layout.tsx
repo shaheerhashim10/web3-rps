@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 
 export default function RootLayout({
   // Layouts must accept a children prop.
