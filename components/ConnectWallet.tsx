@@ -14,7 +14,6 @@ export default function ConnectWallet() {
   // const { data: ensAvatar } = useEnsAvatar({ address })
   const { data: ensName } = useEnsName({ address });
   const { disconnect } = useDisconnect();
-
   const disconnectWallet = () => {
     disconnect();
   };
@@ -23,7 +22,7 @@ export default function ConnectWallet() {
       {isConnected ? (
         <div>
           <span>{ensName ? `${ensName} (${address})` : address}</span>
-          {/* <div>Connected to {connector.name}</div> */}
+          <div>Connected to {connector?.name}</div>
           <button onClick={disconnectWallet}>Disconnect</button>
         </div>
       ) : (
