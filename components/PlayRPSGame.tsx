@@ -7,6 +7,7 @@ import Hasher from "../contracts/abis/Hasher.json";
 import React from "react";
 import { useAccount } from "wagmi";
 import Link from "next/link";
+import io from "socket.io-client";
 declare var window: any;
 
 // 0x13D128C6c6d44D10d945abaDFcA0D71629A1f6a2
@@ -40,7 +41,7 @@ const PlayRPSGame = ({
     Hasher,
     provider
   );
-
+  let socket;
   useEffect(() => {
     setCurrentUrl(window.location.href);
     if (typeof window?.ethereum !== "undefined") {
@@ -49,6 +50,60 @@ const PlayRPSGame = ({
       setProvider(provider);
     }
   }, []);
+  // Socket connection
+  // useEffect(() => {
+  //   const socket = io("http://localhost:3000"); // Replace with your WebSocket server URL
+  //   // const socket = io(currentUrl); // Replace with your WebSocket server URL
+
+  //   socket.on("connect", () => {
+  //     console.log("WebSocket connected.");
+  //   });
+
+  //   socket.on("notification", (data) => {
+  //     console.log("Received notification:", data);
+  //     alert(data);
+  //     // Handle the received notification here (e.g., show an alert).
+  //     // You can update the UI, display a notification, or perform any other action based on the received data.
+  //   });
+
+  //   return () => {
+  //     socket.disconnect();
+  //   };
+  // }, []);
+
+  const socketInitializer = async () => {
+    await fetch('/api/socket');
+
+    socket = io(undefined, {
+      path: '/api/socket'
+    });
+
+    socket.on('connect', () => {
+      console.log('Connected_11', socket.id)
+    })
+
+    /* socket.on('notification',  (data) => {
+      console.log('myData', data)
+    }) */
+    socket.on("notification", (data) => {
+      console.log("Received notification:", data);
+      alert(data);
+    });
+  }
+
+  // Function to emit a notification
+  const sendNotification = () => {
+    // Connect to the WebSocket server
+    // const socket = io(); // Replace with the URL of your WebSocket server
+    // Emit the "notification" event with your data
+    // socket.emit("notification", { message: "Hello, this is a notification!" });
+    socket.emit("notification", "Hello, this is a notification!");
+  };
+
+  useEffect(() => {
+    socketInitializer();
+  })
+
 
   // Function to create a new RPS game
   const createGame = async () => {
@@ -236,6 +291,7 @@ const PlayRPSGame = ({
           </Link>
         )}
       </div>
+      <button onClick={sendNotification}>Notify</button>
     </div>
   );
 };
