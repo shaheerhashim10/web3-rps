@@ -122,6 +122,52 @@ const PlayRPSGame = ({
     }
   };
 
+  // Timeout functions
+  const handleJ1Timeout = async () => {
+    try {
+      let contract;
+      if (contractAddress) {
+        contract = contractAddress;
+      } else {
+        contract = deployedContractAddress;
+      }
+      const rpsContract = new ethers.Contract(contract, RPS.abi, signer);
+      // Initialize contract instance
+      /* const rpsContract = new ethers.Contract(
+        deployedContractAddress,
+        RPS.abi,
+        signer
+      ); */
+
+      // Call the contract's j1Timeout function.
+      const tx = await rpsContract.j1Timeout();
+      await tx.wait();
+
+      setStatus("J1 timed out. J2 won!");
+    } catch (error) {
+      console.error("Error handling j1 timeout:", error);
+    }
+  };
+
+  const handleJ2Timeout = async () => {
+    try {
+      // Initialize contract instance
+      const rpsContract = new ethers.Contract(
+        deployedContractAddress,
+        RPS.abi,
+        signer
+      );
+
+      // Call the contract's j2Timeout function.
+      const tx = await rpsContract.j2Timeout();
+      await tx.wait();
+
+      setStatus("J2 timed out. J1 won!");
+    } catch (error) {
+      console.error("Error handling j2 timeout:", error);
+    }
+  };
+
   return (
     <div className={styles.flex}>
       {/* Player 1 */}
@@ -155,7 +201,7 @@ const PlayRPSGame = ({
           <br />
           <button onClick={createGame}>Create Game</button>
           <button onClick={revealMove}>Reveal Move</button>
-          <br />
+          <button onClick={handleJ2Timeout}>Trigger J2 Timeout</button>
         </div>
       )}
 
@@ -174,6 +220,7 @@ const PlayRPSGame = ({
           />
           <br />
           <button onClick={joinGame}>Join Game</button>
+          <button onClick={handleJ1Timeout}>Trigger J1 Timeout</button>
         </div>
       )}
 
