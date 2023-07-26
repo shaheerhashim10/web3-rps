@@ -18,7 +18,7 @@ export default function ConnectWallet() {
     disconnect();
   };
   return (
-    <div>
+    <div style={{textAlign: 'center'}}>
       {isConnected ? (
         <div>
           <span>{ensName ? `${ensName} (${address})` : address}</span>

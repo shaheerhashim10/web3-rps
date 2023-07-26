@@ -17,7 +17,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-        <h1>Rock Paper Scissors Lizard Spock DApp</h1>
+        <h1 style={{textAlign: 'center'}}>Rock Paper Scissors Lizard Spock DApp</h1>
         <WagmiSetup>
           <ConnectWallet />
           <PlayRPSGame

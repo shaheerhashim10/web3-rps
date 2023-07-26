@@ -199,8 +199,8 @@ const PlayRPSGame = ({
 
   return (
     <div className={styles.flex}>
-      <div>
-        <h3>How to play?</h3>
+      <div style={{ border: "1px solid", width: "17rem" }}>
+        <h3 style={{ textAlign: "center" }}>How to play?</h3>
         <hr />
         <ul>
           <li>Choose your move from 1-5.</li>
@@ -217,7 +217,7 @@ const PlayRPSGame = ({
       </div>
       {/* Player 1 */}
       {!secondPlayerWalletAddress && !contractAddress && (
-        <div>
+        <div style={{ border: "1px solid", padding: "1rem" }}>
           <h1>Player 1 Move</h1>
           <span style={{ fontSize: "1.5rem" }}>Enter your move: </span>
           <input
@@ -268,7 +268,7 @@ const PlayRPSGame = ({
 
       {/* Player 2 */}
       {secondPlayerWalletAddress && contractAddress && (
-        <div>
+        <div style={{ border: "1px solid", padding: "1rem" }}>
           <h1>Player 2 Move</h1>
           <span style={{ fontSize: "1.5rem" }}>Second player move: </span>
           <input
@@ -290,7 +290,14 @@ const PlayRPSGame = ({
         </div>
       )}
       {/* Status box */}
-      <div style={{ marginTop: "3rem" }}>
+      <div
+        style={{
+          marginTop: "3rem",
+          border: "1px solid",
+          width: "20rem",
+          padding: "1rem",
+        }}
+      >
         {/* <div>Move Hash: {moveHash}</div>
         <div>Game Smart Contract Address: {deployedContractAddress}</div> */}
         <h1>Status: {status}</h1>
