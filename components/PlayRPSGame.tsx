@@ -144,11 +144,8 @@ const PlayRPSGame = ({
         setStatus("It's a tie!");
         return;
       }
-      console.log({ move });
-      console.log({ playerTwoMove });
       // Call the win function of the RPS contract to check the winner
       const winner = await rpsContract.win(move, playerTwoMove);
-      console.log({ winner });
       if (winner === true) {
         setStatus("Player 1 (j1) wins!");
       } else {
