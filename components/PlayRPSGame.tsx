@@ -7,7 +7,6 @@ import Hasher from "../contracts/abis/Hasher.json";
 import React from "react";
 import { useAccount } from "wagmi";
 import Link from "next/link";
-import io from "socket.io-client";
 declare var window: any;
 
 // 0x13D128C6c6d44D10d945abaDFcA0D71629A1f6a2
@@ -35,7 +34,8 @@ const PlayRPSGame = ({
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [gameURL, setGameURL] = useState<string | null>(null);
   const { address } = useAccount();
-  const [currentSocket, setCurrentSocket] = useState<any>();
+  const [timeout2, setTimeout2] = useState<boolean>(false);
+  const [timeout1, setTimeout1] = useState<boolean>(false);
 
   const HasherContractAddress = "0x7B54F955FF830738c8e954D7B993EAb9Cf5c0720";
   const hasherContract = new ethers.Contract(
@@ -43,6 +43,7 @@ const PlayRPSGame = ({
     Hasher,
     provider
   );
+  const TIMEOUT = 300000;
   let socket;
   useEffect(() => {
     setCurrentUrl(window.location.href);
@@ -52,31 +53,6 @@ const PlayRPSGame = ({
       setProvider(provider);
     }
   }, []);
-  const socketInitializer = async () => {
-    await fetch("/api/socket");
-
-    socket = io(undefined, {
-      path: "/api/socket",
-    });
-
-    socket.on("connect", () => {
-      console.log("Connected_11", socket.id);
-    });
-
-    socket.on("notification", (data) => {
-      console.log("myData", data);
-    });
-    setCurrentSocket(socket);
-  };
-
-  useEffect(() => {
-    socketInitializer();
-  }, []);
-
-  // Function to emit a notification
-  const sendNotification = () => {
-    currentSocket.emit("notification", "Hello, this is a notification!");
-  };
 
   // Function to create a new RPS game
   const createGame = async () => {
@@ -100,6 +76,7 @@ const PlayRPSGame = ({
       );
       await deployedRPSContract.deployed();
       const urlOfGame = `${currentUrl}?ca=${deployedRPSContract.address}&address=${secondPlayerAddress}`;
+      setTimeout(enablePlayerTwoTimeout, TIMEOUT);
       setDeployedContractAddress(deployedRPSContract.address);
       setGameURL(urlOfGame);
       setStatus("Game created successfully!");
@@ -107,6 +84,13 @@ const PlayRPSGame = ({
       setStatus("Error creating the game.");
       console.error(error);
     }
+  };
+
+  const enablePlayerTwoTimeout = () => {
+    setTimeout2(true);
+  };
+  const enablePlayerOneTimeout = () => {
+    setTimeout1(true);
   };
 
   // Function for player 2 to join the game
@@ -127,6 +111,7 @@ const PlayRPSGame = ({
       });
       await tx.wait();
       setStatus("Game joined successfully!");
+      setTimeout(enablePlayerOneTimeout, TIMEOUT);
     } catch (error) {
       setStatus("Error joining the game.");
       console.error(error);
@@ -186,13 +171,6 @@ const PlayRPSGame = ({
         contract = deployedContractAddress;
       }
       const rpsContract = new ethers.Contract(contract, RPS.abi, signer);
-      // Initialize contract instance
-      /* const rpsContract = new ethers.Contract(
-        deployedContractAddress,
-        RPS.abi,
-        signer
-      ); */
-
       // Call the contract's j1Timeout function.
       const tx = await rpsContract.j1Timeout();
       await tx.wait();
@@ -239,7 +217,6 @@ const PlayRPSGame = ({
             <li>Spock: 5</li>
           </ul>
         </ul>
-
       </div>
       {/* Player 1 */}
       {!secondPlayerWalletAddress && !contractAddress && (
@@ -285,7 +262,9 @@ const PlayRPSGame = ({
               Create Game
             </button>
             <button onClick={revealMove}>Reveal Move</button>
-            <button onClick={handleJ2Timeout}>Trigger J2 Timeout</button>
+            <button onClick={handleJ2Timeout} disabled={!timeout2}>
+              Trigger J2 Timeout
+            </button>
           </div>
         </div>
       )}
@@ -306,8 +285,10 @@ const PlayRPSGame = ({
           <br />
           <br />
           <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <button onClick={joinGame}>Join Game</button>
-          <button onClick={handleJ1Timeout}>Trigger J1 Timeout</button>
+            <button onClick={joinGame}>Join Game</button>
+            <button onClick={handleJ1Timeout} disabled={!timeout1}>
+              Trigger J1 Timeout
+            </button>
           </div>
         </div>
       )}
@@ -323,7 +304,6 @@ const PlayRPSGame = ({
           </Link>
         )}
       </div>
-      {/* <button onClick={sendNotification}>Notify</button> */}
     </div>
   );
 };

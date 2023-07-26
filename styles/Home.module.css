@@ -1,5 +1,5 @@
 .flex {
   display: flex;
   justify-content: space-around;
-  padding: 5rem;
+  padding-top: 5rem;
 }
