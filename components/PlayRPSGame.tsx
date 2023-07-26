@@ -24,8 +24,8 @@ const PlayRPSGame = ({
   const [status, setStatus] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [secondPlayerAddress, setSecondPlayerAddress] = useState<string>("");
-  const [move, setMove] = useState(0);
-  const [playerTwoMove, setPlayerTwoMove] = useState(0);
+  const [move, setMove] = useState(1);
+  const [playerTwoMove, setPlayerTwoMove] = useState(1);
   const [moveHash, setMoveHash] = useState<string>("");
   const [salt, setSalt] = useState<number>();
   const [provider, setProvider] = useState<ethers.providers.Web3Provider>();
@@ -52,61 +52,31 @@ const PlayRPSGame = ({
       setProvider(provider);
     }
   }, []);
-  // Socket connection
-  // useEffect(() => {
-  //   const socket = io("http://localhost:3000"); // Replace with your WebSocket server URL
-  //   // const socket = io(currentUrl); // Replace with your WebSocket server URL
-
-  //   socket.on("connect", () => {
-  //     console.log("WebSocket connected.");
-  //   });
-
-  //   socket.on("notification", (data) => {
-  //     console.log("Received notification:", data);
-  //     alert(data);
-  //     // Handle the received notification here (e.g., show an alert).
-  //     // You can update the UI, display a notification, or perform any other action based on the received data.
-  //   });
-
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
-
   const socketInitializer = async () => {
-    await fetch('/api/socket');
+    await fetch("/api/socket");
 
     socket = io(undefined, {
-      path: '/api/socket'
+      path: "/api/socket",
     });
 
-    socket.on('connect', () => {
-      console.log('Connected_11', socket.id)
-    })
+    socket.on("connect", () => {
+      console.log("Connected_11", socket.id);
+    });
 
-    socket.on('notification',  (data) => {
-      console.log('myData', data)
-    })
+    socket.on("notification", (data) => {
+      console.log("myData", data);
+    });
     setCurrentSocket(socket);
-    /* socket.on("notification", (data) => {
-      console.log("Received notification:", data);
-      alert(data);
-    }); */
-  }
- 
+  };
+
   useEffect(() => {
     socketInitializer();
-  }, [])
+  }, []);
 
- // Function to emit a notification
- const sendNotification = () => {
-  // Connect to the WebSocket server
-  // const socket = io(); // Replace with the URL of your WebSocket server
-  // Emit the "notification" event with your data
-  // socket.emit("notification", { message: "Hello, this is a notification!" });
-  console.log(socket)
-  currentSocket.emit("notification", "Hello, this is a notification!");
-};
+  // Function to emit a notification
+  const sendNotification = () => {
+    currentSocket.emit("notification", "Hello, this is a notification!");
+  };
 
   // Function to create a new RPS game
   const createGame = async () => {
@@ -174,9 +144,35 @@ const PlayRPSGame = ({
       const tx = await rpsContract.solve(move, salt, { gasLimit: 300000 });
       await tx.wait();
       setStatus("Game resolved!");
+      await detectWinner(rpsContract);
     } catch (error) {
       setStatus("Error resolving the game.");
       console.error(error);
+    }
+  };
+
+  const detectWinner = async (rpsContract) => {
+    try {
+      let result;
+      const playerTwoMove = await rpsContract.c2();
+      if (move === playerTwoMove) {
+        setStatus("It's a tie!");
+        return;
+      }
+      console.log({ move });
+      console.log({ playerTwoMove });
+      // Call the win function of the RPS contract to check the winner
+      const winner = await rpsContract.win(move, playerTwoMove);
+      console.log({ winner });
+      if (winner === true) {
+        setStatus("Player 1 (j1) wins!");
+      } else {
+        setStatus("Player 2 (j2) wins!");
+      }
+      return result;
+    } catch (error) {
+      console.error("Error detecting winner:", error);
+      setStatus("Error detecting winner.");
     }
   };
 
@@ -228,11 +224,39 @@ const PlayRPSGame = ({
 
   return (
     <div className={styles.flex}>
+      <div>
+        <h3>How to play?</h3>
+        <hr />
+        <ul>
+          <li>Choose your move from 1-5.</li>
+          <p>The numbers correspond to the Rock Paper Scissors Lizard Spock</p>
+          <ul>
+            {/* <li></li> */}
+            <li>Rock: 1</li>
+            <li>Paper: 2</li>
+            <li>Scissors: 3</li>
+            <li>Lizard: 4</li>
+            <li>Spock: 5</li>
+          </ul>
+        </ul>
+
+      </div>
       {/* Player 1 */}
       {!secondPlayerWalletAddress && !contractAddress && (
         <div>
           <h1>Player 1 Move</h1>
-          <span>Enter Amount to stake: </span>
+          <span style={{ fontSize: "1.5rem" }}>Enter your move: </span>
+          <input
+            type="number"
+            placeholder="Move (0-4)"
+            min="1"
+            max="5"
+            value={move}
+            onChange={(e) => setMove(e.target.valueAsNumber)}
+          />
+          <br />
+          <br />
+          <span style={{ fontSize: "1.5rem" }}>Enter Amount to stake: </span>
           <input
             type="text"
             placeholder="Amount (ETH)"
@@ -240,26 +264,29 @@ const PlayRPSGame = ({
             onChange={(e) => setAmount(e.target.value)}
           />
           <br />
-          First player move:
-          <input
-            type="number"
-            placeholder="Move (0-4)"
-            min="0"
-            max="4"
-            value={move}
-            onChange={(e) => setMove(e.target.valueAsNumber)}
-          />
           <br />
+          <span style={{ fontSize: "1.5rem" }}>
+            Enter Second Player Address:{" "}
+          </span>
           <input
             type="text"
             placeholder="Enter Second Player Address"
             value={secondPlayerAddress}
             onChange={(e) => setSecondPlayerAddress(e.target.value)}
+            size={50}
           />
           <br />
-          <button onClick={createGame}>Create Game</button>
-          <button onClick={revealMove}>Reveal Move</button>
-          <button onClick={handleJ2Timeout}>Trigger J2 Timeout</button>
+          <br />
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <button
+              onClick={createGame}
+              disabled={deployedContractAddress !== ""}
+            >
+              Create Game
+            </button>
+            <button onClick={revealMove}>Reveal Move</button>
+            <button onClick={handleJ2Timeout}>Trigger J2 Timeout</button>
+          </div>
         </div>
       )}
 
@@ -267,34 +294,36 @@ const PlayRPSGame = ({
       {secondPlayerWalletAddress && contractAddress && (
         <div>
           <h1>Player 2 Move</h1>
-          <span>Second player move: </span>
+          <span style={{ fontSize: "1.5rem" }}>Second player move: </span>
           <input
             type="number"
             placeholder="Move (0-4)"
-            min="0"
-            max="4"
+            min="1"
+            max="5"
             value={playerTwoMove}
             onChange={(e) => setPlayerTwoMove(e.target.valueAsNumber)}
           />
           <br />
+          <br />
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
           <button onClick={joinGame}>Join Game</button>
           <button onClick={handleJ1Timeout}>Trigger J1 Timeout</button>
+          </div>
         </div>
       )}
-
       {/* Status box */}
       <div style={{ marginTop: "3rem" }}>
-        <div>Move Hash: {moveHash}</div>
-        <div>Game Smart Contract Address: {deployedContractAddress}</div>
-        <div>Status: {status}</div>
-        <div>Game URL:</div>
+        {/* <div>Move Hash: {moveHash}</div>
+        <div>Game Smart Contract Address: {deployedContractAddress}</div> */}
+        <h1>Status: {status}</h1>
+        <span style={{ fontSize: "1.5rem" }}>Game URL: </span>
         {gameURL && (
           <Link href={gameURL} target="_blank">
             Click here
           </Link>
         )}
       </div>
-      <button onClick={sendNotification}>Notify</button>
+      {/* <button onClick={sendNotification}>Notify</button> */}
     </div>
   );
 };
