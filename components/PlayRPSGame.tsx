@@ -52,7 +52,7 @@ const PlayRPSGame = ({
       setSigner(provider.getSigner(address));
       setProvider(provider);
     }
-  }, []);
+  }, [address]);
 
   // Function to create a new RPS game
   const createGame = async () => {
