@@ -35,6 +35,8 @@ const PlayRPSGame = ({
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [gameURL, setGameURL] = useState<string | null>(null);
   const { address } = useAccount();
+  const [currentSocket, setCurrentSocket] = useState<any>();
+
   const HasherContractAddress = "0x7B54F955FF830738c8e954D7B993EAb9Cf5c0720";
   const hasherContract = new ethers.Contract(
     HasherContractAddress,
@@ -82,28 +84,29 @@ const PlayRPSGame = ({
       console.log('Connected_11', socket.id)
     })
 
-    /* socket.on('notification',  (data) => {
+    socket.on('notification',  (data) => {
       console.log('myData', data)
-    }) */
-    socket.on("notification", (data) => {
+    })
+    setCurrentSocket(socket);
+    /* socket.on("notification", (data) => {
       console.log("Received notification:", data);
       alert(data);
-    });
+    }); */
   }
-
-  // Function to emit a notification
-  const sendNotification = () => {
-    // Connect to the WebSocket server
-    // const socket = io(); // Replace with the URL of your WebSocket server
-    // Emit the "notification" event with your data
-    // socket.emit("notification", { message: "Hello, this is a notification!" });
-    socket.emit("notification", "Hello, this is a notification!");
-  };
-
+ 
   useEffect(() => {
     socketInitializer();
-  })
+  }, [])
 
+ // Function to emit a notification
+ const sendNotification = () => {
+  // Connect to the WebSocket server
+  // const socket = io(); // Replace with the URL of your WebSocket server
+  // Emit the "notification" event with your data
+  // socket.emit("notification", { message: "Hello, this is a notification!" });
+  console.log(socket)
+  currentSocket.emit("notification", "Hello, this is a notification!");
+};
 
   // Function to create a new RPS game
   const createGame = async () => {
